@@ -1,0 +1,3 @@
+Using machine learning to predict the long-term value of NBA draftees 
+http://www.tothemean.com/2014/06/17/machine-learning-predict-long-term-value-in-draft.html
+
