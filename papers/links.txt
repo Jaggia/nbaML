@@ -3,6 +3,7 @@ http://www.tothemean.com/2014/06/17/machine-learning-predict-long-term-value-in-
 
 Defining Modern NBA Player Positions - Applying Machine Learning to Uncover Functional Roles in Basketball
 https://medium.com/hanman/the-evolution-of-nba-player-positions-using-unsupervised-clustering-to-uncover-functional-roles-a1d07089935c
+Github repo: https://github.com/acheng1230/Web_Scraping_NBA_Data
 
 Using Machine Learning to Find the 8 Types of Players in the NBA
 https://fastbreakdata.com/classifying-the-modern-nba-player-with-machine-learning-539da03bb824
