@@ -9,7 +9,40 @@ import matplotlib.pyplot as plt
 # import theano
 # import pymc3 as pm
 
-compositeFile = 'nba-enhanced-stats/BBRef_Composite_1978_2016.xlsm'
-if os.path.isfile(compositeFile):
-    nba = pd.read_csv(compositeFile)
-    print(nba)
+class StatParser:
+    def __init__(self):
+        self.__init__(inFname='Historical.csv')
+
+    def __init__(self, inFname):
+        self.fname = inFname
+        self.nba = pd.read_csv(self.fname)
+        #self.nba.dropna()
+        #self.nba.drop(columns=['Year'])
+
+    def getYears(self, startYear, endYear=None):
+        if endYear == None:
+            return self.nba[self.nba['Year'] >= startYear]
+        else:
+            temp = self.nba[startYear <= self.nba['Year']]
+            return temp[temp['Year'] < endYear]
+
+    def getLabels(self, labels):
+        return self.nba[labels]
+
+    def getColumns(self):
+        return self.nba.columns
+
+
+#compositeFile = '../nba-enhanced-stats/BBRef_Composite_1978_2016.xlsm'
+compositeFile = 'Historical.csv'
+
+x = StatParser(compositeFile)
+print('Loaded file')
+
+[print(col) for col in x.getColumns()]
+
+mlData = x.getYears(2000, 2016)
+print(mlData)
+
+# ML Stuff
+importantFields = ['Age', 'G', 'MP', 'PER']
