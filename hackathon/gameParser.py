@@ -40,12 +40,15 @@ print('Max Players ', maxGamePlayers)
 
 # game = json.load(open('matches/2010-2011/201010260BOS.json'))
 # home = game['home']
-input('Continue')
+# input('Continue')
 
-teamStats = np.zeros((2 * maxGamePlayers - 1, len(featureList), gameCounter))
-print(teamStats.shape)
 totalGames = gameCounter
 gameCounter = 0
+
+lebronStats = np.zeros((1, len(featureList), totalGames))
+teamStats = np.zeros((2 * maxGamePlayers - 1, len(featureList), totalGames))
+print(teamStats.shape)
+
 for fname in os.listdir('matches/2010-2011/'):
     game = json.load(open('matches/2010-2011/' + fname))
 
@@ -53,13 +56,16 @@ for fname in os.listdir('matches/2010-2011/'):
     # find game with LeBron
     for team in ['home', 'away']:
         if 'LeBron James' in game[team]['players'].keys():
+            for fnum, feature in enumerate(featureList):
+                lebronStats[0, fnum, gameCounter] = game[team]['players']['LeBron James'][feature]
             found = True
             playerHomeTeam = team
-            print('Found him ', team)
+            #print('Found him ', team)
             break
 
     if found:
         playerIndex = 0
+        # add Lebron's teammates stats
         for player in game[playerHomeTeam]['players'].keys():
             if player is not 'LeBron James':
                 for fnum, feature in enumerate(featureList):
@@ -67,12 +73,14 @@ for fname in os.listdir('matches/2010-2011/'):
 
                 playerIndex += 1
 
+        # add average of teammates if he doesn't have 11 teammates
         if playerIndex < maxGamePlayers - 1:
             avgStats = np.mean(teamStats[:playerIndex, :, gameCounter], axis=0)
-            print(avgStats.shape)
+            #print(avgStats.shape)
             for i in range(playerIndex, maxGamePlayers - 1):
                 teamStats[i, :, gameCounter] = avgStats
 
+        # add opponents stats
         playerAwayTeam = 'away' if playerHomeTeam is 'home' else 'home'
         playerIndex = maxGamePlayers - 1
         for player in game[playerAwayTeam]['players'].keys():
@@ -80,17 +88,23 @@ for fname in os.listdir('matches/2010-2011/'):
                 teamStats[playerIndex, fnum, gameCounter] = game[playerAwayTeam]['players'][player][feature]
 
             playerIndex += 1
-
+        # add average of opponents if he doesn't have 12 opponents
         if playerIndex < 2 * maxGamePlayers - 1:
             avgStats = np.mean(teamStats[maxGamePlayers-1:playerIndex, :, gameCounter], axis=0)
             for i in range(playerIndex, 2*maxGamePlayers-1):
                 teamStats[i, :, gameCounter] = avgStats
 
+        # negate opponents' stats, go to next game
         teamStats[maxGamePlayers-1:, :, gameCounter] *= -1
-        print(teamStats[:,:,gameCounter])
+        #print(teamStats[:,:,gameCounter])
         gameCounter += 1
 
 # teamStats axis 0 = players
 #           axis 1 = features
 #           axis 2 = games
+
+# lebronStats axis 0 = 0 for LeBron
+#             axis 1 = features
+#             axis 2 = games
+# print(lebronStats)
 print('Done')
