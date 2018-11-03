@@ -10,10 +10,7 @@ import matplotlib.pyplot as plt
 # import pymc3 as pm
 
 class StatParser:
-    def __init__(self):
-        self.__init__(inFname='Historical.csv')
-
-    def __init__(self, inFname):
+    def __init__(self, inFname='Historical.csv'):
         self.fname = inFname
         self.nba = pd.read_csv(self.fname)
         #self.nba.dropna()
@@ -36,7 +33,7 @@ class StatParser:
 #compositeFile = '../nba-enhanced-stats/BBRef_Composite_1978_2016.xlsm'
 compositeFile = 'Historical.csv'
 
-x = StatParser(compositeFile)
+x = StatParser()
 print('Loaded file')
 
 [print(col) for col in x.getColumns()]
