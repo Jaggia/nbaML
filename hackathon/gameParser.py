@@ -15,28 +15,29 @@ def get_feature_list():
     minutesPlayed = {}
     maxGamePlayers = 0
     gameCounter = 0
-    for fname in os.listdir('matches/2010-2011/'):
-        game = json.load(open('matches/2010-2011/' + fname))
-        for team in ['home', 'away']:
-            # count number of games LeBron is in
-            if 'LeBron James' in game[team]['players'].keys():
-                gameCounter += 1
+    for folder in next(os.walk('matches'))[1]: # directories in matches/
+        for fname in os.listdir('matches/' + folder + '/'):
+            game = json.load(open('matches/' + folder + '/' + fname))
+            for team in ['home', 'away']:
+                # count number of games LeBron is in
+                if 'LeBron James' in game[team]['players'].keys():
+                    gameCounter += 1
 
-            # print(game[team])
-            # print(len(game['home']['players'].keys()))
+                # print(game[team])
+                # print(len(game['home']['players'].keys()))
 
-            # count the max number of players in a game
-            maxGamePlayers = maxGamePlayers if \
-                len(game[team]['players'].keys()) < maxGamePlayers \
-                else len(game[team]['players'].keys())
+                # count the max number of players in a game
+                maxGamePlayers = maxGamePlayers if \
+                    len(game[team]['players'].keys()) < maxGamePlayers \
+                    else len(game[team]['players'].keys())
 
-            # count minutes played for each player
-            for player in game[team]['players'].keys():
-                if player not in minutesPlayed:
-                    minutesPlayed[player] = float(game[team]['players'][player]['MP'])
-                else:
-                    if game[team]['players'][player]['MP'] is not None:
-                        minutesPlayed[player] += float(game[team]['players'][player]['MP'])
+                # count minutes played for each player
+                for player in game[team]['players'].keys():
+                    if player not in minutesPlayed:
+                        minutesPlayed[player] = float(game[team]['players'][player]['MP'])
+                    else:
+                        if game[team]['players'][player]['MP'] is not None:
+                            minutesPlayed[player] += float(game[team]['players'][player]['MP'])
 
     minutesPlayed = sorted(minutesPlayed.items(), key=operator.itemgetter(1))[::-1]
     print(minutesPlayed)
@@ -48,60 +49,71 @@ def get_feature_list():
 
     totalGames = gameCounter
     gameCounter = 0
+    minMinutes = 2
 
     lebronStats = np.zeros((1, len(featureList), totalGames))
     teamStats = np.zeros((2 * maxGamePlayers - 1, len(featureList), totalGames))
     print(teamStats.shape)
 
-    for fname in os.listdir('matches/2010-2011/'):
-        game = json.load(open('matches/2010-2011/' + fname))
+    for folder in next(os.walk('matches'))[1]: # directories in matches/
+        for fname in os.listdir('matches/' + folder + '/'):
+            game = json.load(open('matches/' + folder + '/' + fname))
 
-        found = False
-        # find game with LeBron
-        for team in ['home', 'away']:
-            if 'LeBron James' in game[team]['players'].keys():
-                for fnum, feature in enumerate(featureList):
-                    lebronStats[0, fnum, gameCounter] = game[team]['players']['LeBron James'][feature]
-                found = True
-                playerHomeTeam = team
-                # print('Found him ', team)
-                break
-
-        if found:
-            playerIndex = 0
-            # add Lebron's teammates stats
-            for player in game[playerHomeTeam]['players'].keys():
-                if player is not 'LeBron James':
+            found = False
+            # find game with LeBron
+            for team in ['home', 'away']:
+                if 'LeBron James' in game[team]['players'].keys():
                     for fnum, feature in enumerate(featureList):
-                        teamStats[playerIndex, fnum, gameCounter] = game[playerHomeTeam]['players'][player][feature]
+                        lebronStats[0, fnum, gameCounter] = \
+                            game[team]['players']['LeBron James'][feature] / \
+                            game[team]['players']['LeBron James']['MP']
+                    found = True
+                    playerHomeTeam = team
+                    # print('Found him ', team)
+                    break
 
-                    playerIndex += 1
+            if found:
+                playerIndex = 0
+                # add Lebron's teammates stats
+                for player in game[playerHomeTeam]['players'].keys():
+                    if player is not 'LeBron James':
+                        if game[playerHomeTeam]['players'][player]['MP'] is not None and \
+                                float(game[playerHomeTeam]['players'][player]['MP']) > minMinutes:
+                            for fnum, feature in enumerate(featureList):
+                                teamStats[playerIndex, fnum, gameCounter] = \
+                                    game[playerHomeTeam]['players'][player][feature] / \
+                                    game[playerHomeTeam]['players'][player]['MP']
+                            playerIndex += 1
 
-            # add average of teammates if he doesn't have 11 teammates
-            if playerIndex < maxGamePlayers - 1:
-                avgStats = np.mean(teamStats[:playerIndex, :, gameCounter], axis=0)
-                # print(avgStats.shape)
-                for i in range(playerIndex, maxGamePlayers - 1):
-                    teamStats[i, :, gameCounter] = avgStats
+                # add average of teammates if he doesn't have 11 teammates
+                if playerIndex < maxGamePlayers - 1:
+                    avgStats = np.mean(teamStats[:playerIndex, :, gameCounter], axis=0)
+                    # print(avgStats.shape)
+                    for i in range(playerIndex, maxGamePlayers - 1):
+                        teamStats[i, :, gameCounter] = avgStats
 
-            # add opponents stats
-            playerAwayTeam = 'away' if playerHomeTeam is 'home' else 'home'
-            playerIndex = maxGamePlayers - 1
-            for player in game[playerAwayTeam]['players'].keys():
-                for fnum, feature in enumerate(featureList):
-                    teamStats[playerIndex, fnum, gameCounter] = game[playerAwayTeam]['players'][player][feature]
+                # add opponents stats
+                playerAwayTeam = 'away' if playerHomeTeam is 'home' else 'home'
+                playerIndex = maxGamePlayers - 1
+                for player in game[playerAwayTeam]['players'].keys():
+                    if game[playerAwayTeam]['players'][player]['MP'] is not None and \
+                            float(game[playerAwayTeam]['players'][player]['MP']) > minMinutes:
+                        for fnum, feature in enumerate(featureList):
+                            teamStats[playerIndex, fnum, gameCounter] = \
+                                game[playerAwayTeam]['players'][player][feature] / \
+                                game[playerAwayTeam]['players'][player]['MP']
+                        playerIndex += 1
 
-                playerIndex += 1
-            # add average of opponents if he doesn't have 12 opponents
-            if playerIndex < 2 * maxGamePlayers - 1:
-                avgStats = np.mean(teamStats[maxGamePlayers - 1:playerIndex, :, gameCounter], axis=0)
-                for i in range(playerIndex, 2 * maxGamePlayers - 1):
-                    teamStats[i, :, gameCounter] = avgStats
+                # add average of opponents if he doesn't have 12 opponents
+                if playerIndex < 2 * maxGamePlayers - 1:
+                    avgStats = np.mean(teamStats[maxGamePlayers - 1:playerIndex, :, gameCounter], axis=0)
+                    for i in range(playerIndex, 2 * maxGamePlayers - 1):
+                        teamStats[i, :, gameCounter] = avgStats
 
-            # negate opponents' stats, go to next game
-            teamStats[maxGamePlayers - 1:, :, gameCounter] *= -1
-            # print(teamStats[:,:,gameCounter])
-            gameCounter += 1
+                # negate opponents' stats, go to next game
+                # teamStats[maxGamePlayers - 1:, :, gameCounter] *= -1
+                # print(teamStats[:,:,gameCounter])
+                gameCounter += 1
 
     # teamStats axis 0 = players
     #           axis 1 = features

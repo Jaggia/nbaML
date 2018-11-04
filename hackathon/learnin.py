@@ -54,7 +54,6 @@ if __name__ == "__main__":
         del flatLebronStats
         gc.collect()
     else: #average over team and opponents
-        #avgTeamStats = np.concatenate(())
         teamStats = np.concatenate((np.mean(teamStats[:,:,:maxGamePlayers-1],axis=2),
                                        np.mean(teamStats[:,:,maxGamePlayers-1:],axis=2)), axis=1)
 
@@ -68,7 +67,7 @@ if __name__ == "__main__":
 
     print(teamStats.shape, lebronStats.shape)
     Ridgerino = Learner()
-    teamStats = Ridgerino.PCA(teamStats)
+    #teamStats = Ridgerino.PCA(teamStats)
     x_train, y_train, x_test, y_test = Ridgerino.k_folding(data_raw=teamStats, data_labels=lebronStats)
     print("x_train shape: ", x_train.shape)
     print("y_train shape: ", y_train.shape)
