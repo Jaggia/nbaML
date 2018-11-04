@@ -112,4 +112,10 @@ def get_feature_list():
     # print(lebronStats)
     # np.savetxt("gameParserTxts/lebronJames.csv", lebronStats)
     # print('Done')
-    return teamStats, lebronStats
+    teamStats = teamStats.swapaxes(0, 2)
+    lebronStats = lebronStats.swapaxes(0, 2)
+    return teamStats, lebronStats, maxGamePlayers
+
+if __name__ == '__main__':
+    ts, ls = get_feature_list()
+    print('Done')
