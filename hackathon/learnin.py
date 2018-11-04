@@ -4,6 +4,7 @@ import numpy as np
 import gc
 import gameParser
 from sklearn.model_selection import RepeatedKFold
+from sklearn.decomposition import PCA
 
 class Learner():
     def __init__(self):
@@ -32,6 +33,11 @@ class Learner():
             x_train, y_train = data_raw[train], data_labels[train]
             x_test, y_test = data_raw[test], data_labels[test]
         return x_train, y_train, x_test, y_test
+
+    def PCA(self, train_data):
+        pca = PCA()
+        pca.fit(train_data)
+        return pca.transform(train_data)
 
 if __name__ == "__main__":
     teamStats, lebronStats, maxGamePlayers = gameParser.get_feature_list()
@@ -62,6 +68,7 @@ if __name__ == "__main__":
 
     print(teamStats.shape, lebronStats.shape)
     Ridgerino = Learner()
+    teamStats = Ridgerino.PCA(teamStats)
     x_train, y_train, x_test, y_test = Ridgerino.k_folding(data_raw=teamStats, data_labels=lebronStats)
     print("x_train shape: ", x_train.shape)
     print("y_train shape: ", y_train.shape)
