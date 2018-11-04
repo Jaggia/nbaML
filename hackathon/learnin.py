@@ -1,11 +1,39 @@
-from sklearn import linear_model
+import time
 from sklearn.linear_model import Ridge
-from sklearn import metrics
 import numpy as np
 import gc
 import gameParser
+from sklearn.model_selection import RepeatedKFold
 
-def main():
+class Learner():
+    def __init__(self):
+        self.learner = None
+
+    def train_classifier(self, train_data, train_labels):
+        # train model and save the trained model to self.classifier
+        self.learner = Ridge(alpha=.5)
+        self.learner.fit(X=train_data, y=train_labels)
+
+    def predict(self, data):
+        prediction = self.learner.predict(X=data)
+        return prediction
+
+    def k_folding(self, data_raw, data_labels):
+        # x is the data
+        # y r the labels
+        random_num = int(time.time())
+        rkf = RepeatedKFold(n_splits=4, n_repeats=4, random_state=random_num)
+        data_split = rkf.split(X=data_raw, y=data_labels)
+        x_train = []
+        x_test = []
+        y_train = []
+        y_test = []
+        for train, test in data_split:
+            x_train, y_train = data_raw[train], data_labels[train]
+            x_test, y_test = data_raw[test], data_labels[test]
+        return x_train, y_train, x_test, y_test
+
+if __name__ == "__main__":
     teamStats, lebronStats, maxGamePlayers = gameParser.get_feature_list()
     flatten = True
     if flatten:
@@ -23,13 +51,29 @@ def main():
         #avgTeamStats = np.concatenate(())
         pass
 
-    ridgerino = Ridge(alpha=.5)
-    ridgerino.fit(X=teamStats, y=lebronStats)
-    prediction = ridgerino.predict(X=teamStats)
-    print("Accuracy: ", metrics.accuracy_score(lebronStats, prediction))
-    print("F1 score: ", metrics.f1_score(lebronStats, prediction, average='micro'))
+    Ridgerino = Learner()
+    x_train, y_train, x_test, y_test = Ridgerino.k_folding(data_raw=teamStats, data_labels=lebronStats)
+    print("x_train shape: ", x_train.shape)
+    print("y_train shape: ", y_train.shape)
+    print("x_test shape: ", x_test.shape)
+    print("y_test shape: ", y_test.shape)
+    Ridgerino.train_classifier(x_train, y_train)
 
+    inSamplePredicted = Ridgerino.predict(x_train)
+    print("\nTraining results")
+    print("=============================")
+    # print("LBJ : ", lebronStats.shape)
+    # print(lebronStats)
+    # print("Prediction : ", prediction.shape)
+    # print(prediction)
+    print("Score: ", Ridgerino.learner.score(x_train, y_train))
 
-if __name__ == "__main__":
-    main()
-
+    # test model
+    outSamplePredicted = Ridgerino.predict(x_test)
+    print("\nTesting results")
+    print("=============================")
+    # print("LBJ : ", y_test.shape)
+    # print(y_test)
+    # print("Prediction : ", outSamplePredicted.shape)
+    # print(outSamplePredicted)
+    print("Score: ", Ridgerino.learner.score(x_test, y_test))
