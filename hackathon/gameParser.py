@@ -9,6 +9,8 @@ import numpy as np
 def get_feature_list():
     featureList = ['FG', 'FGA', '3P', '3PA', 'FT', 'FTA', 'ORB', 'DRB',
                    'AST', 'STL', 'BLK', 'TOV', 'PF', 'PTS']
+    # featureList = ['FG', '3P', 'FT', 'ORB', 'DRB',
+    #                'AST', 'STL', 'BLK', 'TOV']
 
     minutesPlayed = {}
     maxGamePlayers = 0
