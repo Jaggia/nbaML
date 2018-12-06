@@ -45,6 +45,7 @@ def get_feature_list():
 
     lebronStats = np.zeros((1, len(featureList), totalGames))
     teamStats = np.zeros((2 * maxGamePlayers - 1, len(featureList), totalGames))
+    #allPlayerStats = np.zeros((len(minutesPlayed), len(featureList)))
     print(teamStats.shape)
 
     for folder in next(os.walk('matches'))[1]: # directories in matches/

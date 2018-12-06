@@ -45,7 +45,7 @@ class Learner():
         return pca.transform(train_data)
 
 if __name__ == "__main__":
-    teamStats, lebronStats, maxGamePlayers = gameParser.get_feature_list()
+    teamStats, lebronStats, maxGamePlayers, allPlayerStats = gameParser.get_feature_list()
     average = False
     if not average:
         flatTeamStats = np.zeros((teamStats.shape[0], teamStats.shape[1]*teamStats.shape[2]))
@@ -60,7 +60,7 @@ if __name__ == "__main__":
         gc.collect()
     else: #average over team and opponents
         teamStats = np.concatenate((np.mean(teamStats[:,:,:maxGamePlayers-1],axis=2),
-                                       np.mean(teamStats[:,:,maxGamePlayers-1:],axis=2)), axis=1)
+                                    np.mean(teamStats[:,:,maxGamePlayers-1:],axis=2)), axis=1)
 
         flatLebronStats = np.zeros((lebronStats.shape[0], lebronStats.shape[1]*lebronStats.shape[2]))
         for numGame in range(teamStats.shape[0]):
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         del flatLebronStats
         gc.collect()
 
-    print('teamStats shape {}, lebronStats shape {} '.format(teamStats.shape, lebronStats.shape))
+    print(f'teamStats shape {teamStats.shape}, lebronStats shape {lebronStats.shape} ')
     Ridgerino = Learner()
     teamStats = Ridgerino.PCA(teamStats)
     x_train, y_train, x_test, y_test = Ridgerino.k_folding(data_raw=teamStats, data_labels=lebronStats)
