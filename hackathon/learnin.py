@@ -35,7 +35,12 @@ class Learner():
         return x_train, y_train, x_test, y_test
 
     def PCA(self, train_data):
-        pca = PCA()
+        mean = np.mean(train_data, axis=0).reshape((1, train_data.shape[1]))
+        mean = np.tile(mean, (train_data.shape[0], 1))
+        covar = 1 / (train_data.shape[0] - 1) * np.matmul((train_data - mean).T, (train_data - mean))
+        vals, vecs = np.linalg.eig(covar)
+        print(vals)
+        pca = PCA(n_components=10)
         pca.fit(train_data)
         return pca.transform(train_data)
 
@@ -65,9 +70,9 @@ if __name__ == "__main__":
         del flatLebronStats
         gc.collect()
 
-    print(teamStats.shape, lebronStats.shape)
+    print('teamStats shape {}, lebronStats shape {} '.format(teamStats.shape, lebronStats.shape))
     Ridgerino = Learner()
-    #teamStats = Ridgerino.PCA(teamStats)
+    teamStats = Ridgerino.PCA(teamStats)
     x_train, y_train, x_test, y_test = Ridgerino.k_folding(data_raw=teamStats, data_labels=lebronStats)
     print("x_train shape: ", x_train.shape)
     print("y_train shape: ", y_train.shape)

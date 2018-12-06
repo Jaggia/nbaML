@@ -17,7 +17,7 @@ class StatParser:
         #self.nba.drop(columns=['Year'])
 
     def getYears(self, startYear, endYear=None):
-        if endYear == None:
+        if endYear is None:
             return self.nba[self.nba['Year'] >= startYear]
         else:
             temp = self.nba[startYear <= self.nba['Year']]
@@ -39,7 +39,9 @@ print('Loaded file')
 [print(col) for col in x.getColumns()]
 
 mlData = x.getYears(2000, 2016)
-print(mlData)
+#print(mlData)
+
+print(mlData[mlData['Tm'] == 'SEA'][mlData['Year'] == 2008.0])
 
 # ML Stuff
 importantFields = ['Age', 'G', 'MP', 'PER']
