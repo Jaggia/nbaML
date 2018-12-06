@@ -10,9 +10,9 @@ class Learner():
     def __init__(self):
         self.learner = None
 
-    def train_classifier(self, train_data, train_labels):
+    def train_classifier(self, train_data, train_labels, alpha=.5):
         # train model and save the trained model to self.classifier
-        self.learner = Ridge(alpha=.5)
+        self.learner = Ridge(alpha=alpha)
         self.learner.fit(X=train_data, y=train_labels)
 
     def predict(self, data):
@@ -25,13 +25,11 @@ class Learner():
         random_num = int(time.time())
         rkf = RepeatedKFold(n_splits=4, n_repeats=4, random_state=random_num)
         data_split = rkf.split(X=data_raw, y=data_labels)
-        x_train = []
-        x_test = []
-        y_train = []
-        y_test = []
+
         for train, test in data_split:
             x_train, y_train = data_raw[train], data_labels[train]
             x_test, y_test = data_raw[test], data_labels[test]
+
         return x_train, y_train, x_test, y_test
 
     def PCA(self, train_data):
@@ -39,9 +37,11 @@ class Learner():
         mean = np.tile(mean, (train_data.shape[0], 1))
         covar = 1 / (train_data.shape[0] - 1) * np.matmul((train_data - mean).T, (train_data - mean))
         vals, vecs = np.linalg.eig(covar)
-        print(vals)
+        print('=======PCA RESULTS=======')
+        print(vals / np.sum(vals))
         pca = PCA(n_components=10)
         pca.fit(train_data)
+        print(pca.explained_variance_ratio_)
         return pca.transform(train_data)
 
 if __name__ == "__main__":
