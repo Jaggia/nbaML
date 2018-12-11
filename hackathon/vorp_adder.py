@@ -31,11 +31,11 @@ for folder in next(os.walk('matches'))[1]:  # directories in matches/
             else:
                 teamGamesPlayed[team_name] += 1
 
-for folder in next(os.walk('matches'))[1]:  # directories in matches/
-    for fname in os.listdir('matches/' + folder + '/'):
-
-
-
+# for folder in next(os.walk('matches'))[1]:  # directories in matches/
+#     for fname in os.listdir('matches/' + folder + '/'):
+#
+#
+#
 minutesPlayed = sorted(minutesPlayed.items(), key=operator.itemgetter(1))[::-1]
 teamGamesPlayed = sorted(teamGamesPlayed.items(), key=operator.itemgetter(1))[::-1]
 print(minutesPlayed)
