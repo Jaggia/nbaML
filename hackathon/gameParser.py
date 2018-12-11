@@ -29,14 +29,15 @@ def get_feature_list():
                 # count minutes played for each player
                 for player in game[team]['players'].keys():
                     if player not in minutesPlayed:
-                        #minutesPlayed[player] = float(game[team]['players'][player]['MP'])
-                        pass
+                        minutesPlayed[player] = float(game[team]['players'][player]['MP'])
+                        # pass
                     else:
                         if game[team]['players'][player]['MP'] is not None:
                             minutesPlayed[player] += float(game[team]['players'][player]['MP'])
 
     minutesPlayed = sorted(minutesPlayed.items(), key=operator.itemgetter(1))[::-1]
     print(minutesPlayed)
+    input()
     print('Max Players ', maxGamePlayers)
 
     totalGames = gameCounter

@@ -166,7 +166,7 @@ def searchSongs(songids, client_access_token):
                         wordMatrix = np.zeros(shape=(1, 1))
                     else:
                         prevWordMatrix = wordMatrix
-                        wordMatrix = np.zeros(shape=(numWords, numWords))
+                        wordMatrix = np.zeros(shap1e=(numWords, numWords))
                         wordMatrix[:-1, :-1] = prevWordMatrix
                         wordMatrix[wordList.index(prevWord), -1] += 1
                 else:
