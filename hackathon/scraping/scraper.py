@@ -31,8 +31,9 @@ teams =["ATL", "BKN", "BOS", "CHA", "CHI", "CLE", "DAL", "DEN", "DET", "GSW",
         "OKC", "ORL", "PHI", "PHX", "POR", "SAC", "SAS", "TOR", "UTA", "WAS",
         "NJN", "VAN", "NOH", "SEA"] ## old names
 driver = None
-for year in range(2000, 2017):
-    for team in teams:
+#for year in range(2000, 2017):
+for year in range(2000, 2001):
+    for team in teams[:1]:
         fname = 'data/{}/{}_advanced.txt'.format(year, team)
         if not os.path.isdir('data/' + str(year)):
             os.mkdir('data/' + str(year))
@@ -42,24 +43,52 @@ for year in range(2000, 2017):
             url = "https://www.basketball-reference.com/teams/" + str(team) \
                   + "/" + str(year) + ".html"
             driver.get(url=url)
+            gotAdvanced = False
             try:
-                advanced_table = driver.find_element_by_id(id_='advanced')
+                advanced = driver.find_element_by_id(id_='advanced')
+                gotAdvanced = True
+                per_game = driver.find_element_by_id(id_='per_game')
+                per_100 = driver.find_element_by_id(id_='per_poss')
+                total = driver.find_element_by_id(id_='totals')
             except:
+                if gotAdvanced:
+                    print("Got advanced but still threw exception")
                 continue
-            lines = advanced_table.text
+            lines = advanced.text
             # print(advanced_table.text)
-            stats = []
+            advStats = []
             for n, line in enumerate(lines.split('\n')):
                 # print(line + '\n\n')
                 if n == 0:
-                    keys = line.split(' ')
-                    keys[1] = "First"
-                    keys[2] = "Last"
+                    advKeys = line.split(' ')
+                    advKeys[1] = "First"
+                    advKeys[2] = "Last"
                 else:
-                    stats += [line.split(' ')]
+                    advStats += [line.split(' ')]
 
-            while '' in keys:
-                keys.remove('')
+            while '' in advKeys:
+                advKeys.remove('')
+
+            prefixes = ['TOT_', 'PER_100_', 'PER_GAME_']
+            stats = []
+            for m, lines in enumerate([total.text, per_100.text, per_game.text]):
+                prefix = prefixes[m]
+                for n, line in enumerate(lines.split('\n')):
+                    # print(line + '\n\n')
+                    startIndex = None
+                    if n == 0:
+                        keys = line.split(' ')
+                        keys[1] = "First"
+                        keys[2] = "Last"
+                        startIndex = keys.index('GS') + 1
+                        keys = keys[startIndex:]
+                        keys = [prefix + key for key in keys]
+                    else:
+                        stats += [line.split(' ')[startIndex:]]
+                print(f'{prefix} Keys length: {len(keys)}, Stats length: {len(stats)}')
+                advKeys.append(keys)
+                [advStats[player].append(stats[player]) for player in range(len(stats))]
+                print(f'Total length of keys: {len(advKeys)}, Total length of stats: {len(advStats[0])}')
 
             with open(fname, 'w') as of:
                 [of.write(key + ' ') for key in keys[:-1]]
