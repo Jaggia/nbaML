@@ -13,7 +13,7 @@ def fix_naming():
                                             delim_whitespace=True,
                                             header=0)
                 # print(teamSeasonData)
-            except Exception, e:
+            except Exception as e:
                 error_str = str(e)
                 print(error_str)
                 comma_idx = error_str.index(",")
@@ -56,3 +56,4 @@ def extract_dfs():
 
 if __name__ == "__main__":
     # fix_naming()
+    extract_dfs()
